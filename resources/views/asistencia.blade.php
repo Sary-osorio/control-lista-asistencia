@@ -6,13 +6,37 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex justify-center items-center flex-col">
-                <h1 class="mt-4 text-blue-500 text-lg font-bold">Marque la asistencia de este dia:</h1>
-                <div class="p-6 text-gray-900 w-full">
+                <div class="flex  flex-row items-center w-full justify-around">
+                    <div class=" text-center">
+
+                        <h1 class="mt-4 text-blue-500 text-lg font-bold">Marque la asistencia de este dia:</h1>
+                        <form action="{{ route('asistencia.index') }}" method="GET">
+                            <div class="flex flex-col lg:flex-row items-center justify-center">
+
+                                    <label for="buscar" class="me-2"> </label>
+                                    <input type="date" class="my-2 lg:my-0 max-w-72 lg:max-w-auto" id="buscar" name="buscar" value="{{ $fecha}}"  max="{{ date('Y-m-d')}}" min="{{"1945-01-01" }}">
+
+
+                                    <button class="mx-4" type="submit" > Buscar Fecha</button>
+
+                              </div>
+                              @if (session('error'))
+                                <div class="alert alert-danger">
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+                        </form>
+                    </div>
+                    {{-- <div class="">
+                        <button class="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded mt-4" id="openModal">Guardar asistencia de otra fecha</button>
+                    </div> --}}
+                </div>
+                <div class="p-6 text-gray-900 w-full flex justify-center items-center">
                     <table class="">
                         <thead class="">
                               <tr>
                                 <th>Nombre</th>
-                                <th>Fecha {{ now()->format('d-m-Y') }}</th>
+                                <th>Fecha {{ $fecha }}</th>
                                 <th>Mensaje</th>
                               </tr>
                             </thead>
@@ -44,7 +68,67 @@
             </div>
         </div>
     </div>
+    {{-- <div id="myModal" class="modal"> --}}
+        <!-- Contenido del Modal -->
+        {{-- <div class="modal-content">
+          <span class="close">&times;</span>
+          <h2 class="text-center font-bold">Registre una nueva asistencia</h2> --}}
+          {{-- <div>
+            <form action="{{ route('asistencia.listado') }}" method="GET">
+                <div class="flex flex-col lg:flex-row items-center justify-center">
+
+                        <label for="buscar" class="me-2">Seleccione una fecha: </label>
+                        <input type="date" class="my-2 lg:my-0 max-w-72 lg:max-w-auto" id="buscar" name="buscar" max="{{ date('Y-m-d')}}" min="{{"1945-01-01" }}">
+
+
+                        <button class="mx-4" type="submit" > Guardar Fecha</button>
+
+                  </div>
+                  @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+            </form>
+          </div>
+          <div class="p-6 text-gray-900 w-full flex justify-center items-center">
+            <table class="">
+                <thead class="">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Fecha {{ now()->format('d-m-Y') }}</th>
+                        <th>Mensaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($miembros as $miembro)
+                            <tr>
+                                <td>{{ $miembro['nombre'] }} {{ $miembro['apellidos'] }}</td>
+                                <td>
+                                    @php
+                                        $checkboxId = 'asistio_' . $miembro['id'];
+                                    @endphp
+
+                                    <input type="checkbox" class="asistencia-checkbox" id="{{ $checkboxId }}" style="display: none" data-id="{{ $miembro['id'] }}" @if($miembro['asistio']) checked @endif >
+                                    <label class="switch" for="{{ $checkboxId }}"></label>
+
+                                </td>
+                                <td>
+                                    @php
+                                        $mensajeId = 'mensaje_' . $miembro['id'];
+                                    @endphp
+                                    <input type="checkbox" class="mensaje-checkbox" id="{{ $mensajeId }}" style="display: none"  data-id-mensaje="{{ $miembro['id'] }}" @if($miembro['mensaje']) checked disabled @endif>
+                                    <label class="switch" for="{{ $mensajeId }}"></label>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                  </table>
+        </div>
+        </div>
+      </div> --}}
 </x-app-layout>
+
 
 <script>
     $(document).ready(function() {
@@ -53,6 +137,7 @@
 
             let asistio = $("#asistio_" + id).is(":checked") ? 1 : 0;
             let mensaje = $("#mensaje_" + id).is(":checked") ? 1 : 0;
+            let fecha = $("#buscar").val();
 
             if (asistio) {
             $("#asistio_" + id).prop("disabled", true);
@@ -68,7 +153,8 @@
                 _token: "{{ csrf_token() }}",
                 miembro_id: id,
                 asistio: asistio,
-                mensaje: mensaje
+                mensaje: mensaje,
+                fecha: fecha
             };
             $.ajax({
                 url: url,
@@ -78,6 +164,14 @@
                     console.log(response);
                 }
             });
+        });
+
+        $("#openModal").on("click", function() {
+            $("#myModal").show();
+        });
+
+        $(".close").on("click", function() {
+            $("#myModal").fadeOut(300);
         });
 
     //     (".mensaje-checkbox").on("change", function() {

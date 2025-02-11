@@ -37,7 +37,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                        @foreach ($miembros as $miembro)
+                        @foreach ($listado as $miembro)
                       <tr>
                         <td>{{ $miembro->nombre }} {{ $miembro->apellidos }}</td>
                       </tr>

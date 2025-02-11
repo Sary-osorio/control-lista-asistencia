@@ -28,6 +28,7 @@ Route::prefix('miembro')->middleware('auth')->group(function () {
 Route::prefix('asistencia')->middleware('auth')->group(function () {
     Route::get('/', [AsistenciaController::class, 'index'])->name('asistencia.index');
     Route::get('/listado/{param?}', [AsistenciaController::class, 'listadoAsistencia'])->name('asistencia.listado');
+    Route::get('/anterior/{param?}', [AsistenciaController::class, 'asistenciaAnterior'])->name('asistencia.anterior');
     Route::post('/create', [AsistenciaController::class, 'create'])->name('asistencia.create');
     // Route::post('/listado/search', [AsistenciaController::class, 'searchAsistencia'])->name('asistencia.search');
 });

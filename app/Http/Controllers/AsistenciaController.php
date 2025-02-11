@@ -11,15 +11,16 @@ use function Laravel\Prompts\error;
 
 class AsistenciaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $miembros = Miembro::with(['asistencias' => function ($q) {
+        $fecha = $request->buscar ?? now()->toDateString(); // Si no hay búsqueda, usa la fecha actual
+        $miembros = Miembro::with(['asistencias' => function ($q) use ($fecha) {
             $q->select('miembro_id', 'fecha', 'asistio', 'mensaje')
-                ->where('fecha', now()->toDateString()); // Filtra solo la asistencia del día
+                ->where('fecha', $fecha); // Filtra solo la asistencia del día
         }])->get(['id', 'nombre', 'apellidos']);
 
         // Transformar la colección en un array con asistencia como objeto en lugar de colección
-        $data = $miembros->map(function ($miembro) {
+        $data = $miembros->map(function ($miembro) use ($fecha) {
             return [
                 'id' => $miembro->id,
                 'nombre' => $miembro->nombre,
@@ -30,7 +31,7 @@ class AsistenciaController extends Controller
             ];
         });
 
-        return view('asistencia', ['miembros' => $data->toArray()]);
+        return view('asistencia', ['miembros' => $data->toArray(), 'fecha' => $fecha]);
     }
 
     public function create(Request $request)
@@ -38,13 +39,14 @@ class AsistenciaController extends Controller
         $miembro = $request->miembro_id;
         $asistio = $request->asistio;
         $mensaje = $request->mensaje;
+        $fecha = $request->fecha;
 
         if (!$miembro) {
             return response()->json(['error' => 'Faltan datos']);
         }
 
         $asistencia = Asistencia::where('miembro_id', $miembro)
-            ->where('fecha', now()->toDateString())
+            ->where('fecha', $fecha)
             ->first();
 
 
@@ -63,7 +65,7 @@ class AsistenciaController extends Controller
             // atributos de busqueda
             [
                 'miembro_id' => $miembro,
-                'fecha' => now()->toDateString(),
+                'fecha' => $fecha,
             ],
             // atributos de actualizacion
             [
@@ -83,6 +85,22 @@ class AsistenciaController extends Controller
         if ($request->has('buscar') && empty($request->buscar)) {
             return redirect()->route('asistencia.listado')->with('error', 'No se ha ingresado un dato a buscar');
         }
+
+        $listado = Miembro::whereHas('asistencias', function ($query) use ($fecha) {
+            $query->whereDate('fecha', $fecha);
+        })->get();
+
+        return view('listado', compact('listado'));
+    }
+
+
+    public function asistenciaAnterior(Request $request)
+    {
+
+        if ($request->has('buscar') && empty($request->buscar)) {
+            return redirect()->route('asistencia.anterior')->with('error', 'No se ha ingresado un dato a buscar');
+        }
+        $fecha = $request->buscar;
 
         $miembros = Miembro::whereHas('asistencias', function ($query) use ($fecha) {
             $query->whereDate('fecha', $fecha);
