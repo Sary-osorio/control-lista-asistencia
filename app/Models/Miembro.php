@@ -11,8 +11,7 @@ class Miembro extends Model
     protected $fillable = [
         'nombre',
         'apellidos',
-        'fecha_nac',
-        'grupo_extra',
+        'fecha_nac'
     ];
 
     protected $casts = [
@@ -27,10 +26,5 @@ class Miembro extends Model
     public function getAgeAttribute()
     {
         return now()->diffInYears($this->fecha_nac);
-    }
-
-    public function asistencias()
-    {
-        return $this->hasMany(Asistencia::class);
     }
 }

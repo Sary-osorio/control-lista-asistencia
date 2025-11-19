@@ -13,25 +13,27 @@ class AsistenciaController extends Controller
 {
     public function index(Request $request)
     {
-        $fecha = $request->buscar ?? now()->toDateString(); // Si no hay búsqueda, usa la fecha actual
-        $miembros = Miembro::with(['asistencias' => function ($q) use ($fecha) {
-            $q->select('miembro_id', 'fecha', 'asistio', 'mensaje')
-                ->where('fecha', $fecha); // Filtra solo la asistencia del día
-        }])->get(['id', 'nombre', 'apellidos']);
+        // $fecha = $request->buscar ?? now()->toDateString(); // Si no hay búsqueda, usa la fecha actual
+        // $miembros = Miembro::with(['asistencias' => function ($q) use ($fecha) {
+        //     $q->select('miembro_id', 'fecha', 'asistio', 'mensaje')
+        //         ->where('fecha', $fecha); // Filtra solo la asistencia del día
+        // }])->get(['id', 'nombre', 'apellidos']);
 
-        // Transformar la colección en un array con asistencia como objeto en lugar de colección
-        $data = $miembros->map(function ($miembro) use ($fecha) {
-            return [
-                'id' => $miembro->id,
-                'nombre' => $miembro->nombre,
-                'apellidos' => $miembro->apellidos,
-                'fecha' => $miembro->asistencias->first()?->fecha,
-                'asistio' => $miembro->asistencias->first()?->asistio,
-                'mensaje' => $miembro->asistencias->first()?->mensaje,
-            ];
-        });
+        // // Transformar la colección en un array con asistencia como objeto en lugar de colección
+        // $data = $miembros->map(function ($miembro) use ($fecha) {
+        //     return [
+        //         'id' => $miembro->id,
+        //         'nombre' => $miembro->nombre,
+        //         'apellidos' => $miembro->apellidos,
+        //         'fecha' => $miembro->asistencias->first()?->fecha,
+        //         'asistio' => $miembro->asistencias->first()?->asistio,
+        //         'mensaje' => $miembro->asistencias->first()?->mensaje,
+        //     ];
+        // });
 
-        return view('asistencia', ['miembros' => $data->toArray(), 'fecha' => $fecha]);
+        // return view('asistencia', ['miembros' => $data->toArray(), 'fecha' => $fecha]);
+
+        return view('asistencia');
     }
 
     public function create(Request $request)

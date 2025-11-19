@@ -1,13 +1,11 @@
 <x-app-layout>
-    <x-slot name="header">
-
-    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('miembro.create') }}" method="POST">
+                    <livewire:miembros />
+                    {{-- <form action="{{ route('miembro.create') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-2 gap-4">
                             <div class="col-span-2 md:col-span-1">
@@ -50,12 +48,12 @@
                             <button type="submit" class="">Submit</button>
                         </div>
                         </div>
-                    </form>
+                    </form> --}}
 
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-2 flex justify-center">
+            {{-- <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-2 flex justify-center">
                 <table class="table-auto border border-gray-300 rounded-lg w-[90%] m-4 shadow-lg">
                     <thead class="bg-gray-400 text-white">
                         <tr>
@@ -74,28 +72,7 @@
                         @endforeach
                     </tbody>
                 </table>
-
-
-                {{-- <table class="table-auto border border-gray-400 rounded-md p-4 w-[90%] m-4">
-                    <thead class="rounded-md">
-                      <tr class="bg-gray-400 rounded-md">
-                        <th>Nombre</th>
-                        <th>Fecha de Nacimiento</th>
-                        <th>Grupo extra</th>
-                      </tr>
-                    </thead>
-                    <tbody class="rounded-md">
-                        @foreach ($miembros as $miembro)
-                      <tr>
-                        <td class="text-center py-2">{{ $miembro->nombre }} {{ $miembro->apellidos }}</td>
-                        <td class="text-center py-2">{{ $miembro->fecha_nac}}</td>
-                        <td class="text-center py-2">{{ $miembro->grupo_extra}}</td>
-
-                      </tr>
-                        @endforeach
-                    </tbody>
-                  </table> --}}
-            </div>
+            </div> --}}
         </div>
     </div>
 </x-app-layout>
