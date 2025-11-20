@@ -9,15 +9,15 @@ class Asistencia extends Model
     protected $table = 'asistencias';
 
     protected $fillable = [
-        'miembro_id',
+        'grupo_miembro_id',
         'fecha',
         'asistio',
         'mensaje',
     ];
 
-    public function miembro()
+    public function miembroGrupo()
     {
-        return $this->belongsTo(Miembro::class);
+        return $this->belongsTo(MiembrosGrupo::class, 'grupo_miembro_id');
     }
 
     // public function getAsistioAttribute($value)

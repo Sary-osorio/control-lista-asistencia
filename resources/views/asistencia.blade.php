@@ -2,11 +2,11 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <livewire:asistencia />
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex justify-center items-center flex-col">
-                <div class="flex  flex-row items-center w-full justify-around">
-                    <div class=" text-center">
+                {{-- <div class="flex  flex-row items-center w-full justify-around">
+                    <div class=" text-center"> --}}
 
-                        <h1 class="mt-4 text-blue-500 text-lg font-bold">Marque la asistencia de este dia:</h1>
                         {{-- <form action="{{ route('asistencia.index') }}" method="GET">
                             <div class="flex flex-col lg:flex-row items-center justify-center">
 
@@ -23,12 +23,12 @@
                                 </div>
                             @endif
                         </form> --}}
-                    </div>
+                    {{-- </div> --}}
                     {{-- <div class="">
                         <button class="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded mt-4" id="openModal">Guardar asistencia de otra fecha</button>
                     </div> --}}
-                </div>
-                <div class="p-6 text-gray-900 w-full flex justify-center items-center">
+                {{-- </div> --}}
+                {{-- <div class="p-6 text-gray-900 w-full flex justify-center items-center"> --}}
                     {{-- <table class="">
                         <thead class="">
                               <tr>
@@ -61,7 +61,7 @@
                                 @endforeach
                             </tbody>
                           </table> --}}
-                </div>
+                {{-- </div> --}}
             </div>
         </div>
     </div>

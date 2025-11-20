@@ -88,9 +88,7 @@ class AsistenciaController extends Controller
             return redirect()->route('asistencia.listado')->with('error', 'No se ha ingresado un dato a buscar');
         }
 
-        $listado = Miembro::whereHas('asistencias', function ($query) use ($fecha) {
-            $query->whereDate('fecha', $fecha);
-        })->get();
+        $listado = Miembro::get();
 
         return view('listado', compact('listado'));
     }

@@ -20,7 +20,7 @@ class Miembro extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->nombre . ' ' . $this->apellido;
+        return $this->nombre . ' ' . $this->apellidos;
     }
 
     public function getAgeAttribute()

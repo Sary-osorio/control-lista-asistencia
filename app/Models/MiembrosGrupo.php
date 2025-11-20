@@ -22,4 +22,9 @@ class MiembrosGrupo extends Model
     {
         return $this->belongsTo(Grupos::class);
     }
+
+    public function asistencias()
+    {
+        return $this->hasMany(Asistencia::class, 'grupo_miembro_id');
+    }
 }
