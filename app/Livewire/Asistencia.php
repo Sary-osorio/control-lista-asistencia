@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Asistencia as ModelsAsistencia;
+use App\Models\Grupos;
 use App\Models\MiembrosGrupo;
 use Carbon\Carbon;
 use Livewire\Component;
@@ -10,16 +11,19 @@ use Livewire\Component;
 class Asistencia extends Component
 {
     public $fecha;
+    public $grupoId;
     public $miembroId;
 
-    public function mount()
+    public function mount($fecha=null)
     {
-            $this->fecha = $this->fecha ?? now()->format('d-m-Y');
+        $this->fecha = $fecha ? Carbon::parse($fecha)->format('Y-m-d') : now()->format('Y-m-d');
     }
 
     public function buscarFecha()   {
         $this->fecha = Carbon::parse($this->fecha)->format('d-m-Y');
     }
+
+    public function changeGrupo(){}
 
     public function actualizarAsistencia($miembroId)
     {
@@ -39,12 +43,18 @@ class Asistencia extends Component
 
     public function render()
     {
+
         $fecha = $this->fecha; // Si no hay búsqueda, usa la fecha actual
+        $grupoId=$this->grupoId;
         $userId= auth()->user()->id;
 
         $miembros= MiembrosGrupo::with('asistencias', 'miembro')
-        ->whereHas('grupo', function ($query) use ($userId) {
+        ->whereHas('grupo', function ($query) use ($userId, $grupoId) {
             $query->where('user_id', $userId);
+            $query->where('id', $grupoId);
+        })
+        ->whereHas('asistencias', function ($query) use ($fecha) {
+            $query->where('fecha', $fecha);
         })
         ->where('estado', 1)
         ->get();
@@ -59,6 +69,14 @@ class Asistencia extends Component
             ];
         });
 
-        return view('livewire.asistencia', ['miembros' => $data->toArray(), 'fecha' => $fecha]);
+        $grupos = Grupos::select('id', 'nombre')->where('user_id', $userId)
+        ->orderBy('id', 'desc')
+        ->get();
+
+        return view('livewire.asistencia', [
+            'miembros' => $data->toArray(),
+            'grupos' => $grupos,
+            'fecha' => $fecha
+        ]);
     }
 }

@@ -5,9 +5,13 @@ namespace App\Livewire;
 use App\Models\Grupos as ModelsGrupos;
 use GuzzleHttp\Psr7\Request;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Grupos extends Component
 {
+    use WithPagination;
+    protected $paginationTheme = 'tailwind';
+
     public $openModal = false;
     public $nombre;
     public $descripcion;
@@ -44,7 +48,10 @@ class Grupos extends Component
 
     public function render()
     {
-        $grupos = ModelsGrupos::all();
+        $userId=auth()->user()->id;
+        $grupos = ModelsGrupos::where('user_id', $userId)
+        ->orderBy('id', 'desc')
+        ->paginate(5);
 
         return view('livewire.grupos', ['grupos' => $grupos]);
     }

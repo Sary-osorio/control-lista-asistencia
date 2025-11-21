@@ -6,9 +6,13 @@ use App\Models\Grupos;
 use App\Models\Miembro;
 use App\Models\MiembrosGrupo;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Miembros extends Component
 {
+    use WithPagination;
+    protected $paginationTheme = 'tailwind';
+
     public $openModal = false;
     public $nombre;
     public $apellido;
@@ -57,10 +61,10 @@ class Miembros extends Component
 
         $data= MiembrosGrupo::whereHas('grupo', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->get();
-
-
-        $data = $data->map(function ($item) {
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(5)
+        ->through(function ($item) {
             return [
                 'miembro_id' => $item->miembro_id,
                 'grupo_id' => $item->grupo_id,
@@ -70,7 +74,6 @@ class Miembros extends Component
                 'estado' => $item->estado
             ];
         });
-
 
         return view('livewire.miembros', compact('grupos', 'data'));
     }
