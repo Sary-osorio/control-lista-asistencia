@@ -4,6 +4,9 @@
         <x-primary-button wire:click="abrirModal">Agregar nuevo grupo</x-primary-button>
     </div>
     <div class="pt-6">
+        @if($grupos->isEmpty())
+            <p class="text-3xl text-center text-gray-400 font-bold">No hay grupos disponibles</p>
+        @else
         <table class="w-full m-0">
             <thead>
                 <tr>
@@ -45,6 +48,7 @@
             </div>
         </div>
 
+        @endif
 
     </div>
     @if ($openModal)

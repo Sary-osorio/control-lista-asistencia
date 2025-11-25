@@ -5,6 +5,9 @@
     </div>
 
     <div class="flex flex-col justify-center pt-6">
+        @if ($data->isEmpty())
+        <p class="text-3xl text-center text-gray-400 font-bold">No hay miembros disponibles</p>
+        @else
         <table class="w-full m-0">
             <thead>
                 <tr>
@@ -70,6 +73,7 @@
                 @endif
             @endforeach
         </div>
+        @endif
     </div>
 
     @if ($openModal)

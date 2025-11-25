@@ -12,34 +12,65 @@ class Asistencia extends Component
 {
     public $fecha;
     public $grupoId;
-    public $miembroId;
+    public $asistencias=[];
 
-    public function mount($fecha=null)
+    public function mount()
     {
-        $this->fecha = $fecha ? Carbon::parse($fecha)->format('Y-m-d') : now()->format('Y-m-d');
+        $grupos = Grupos::where('user_id', auth()->id())->get();
+
+        if ($grupos->count() > 0) {
+            $this->grupoId = $grupos->last()->id;
+        }
+
+        $this->fecha = now()->format('d-m-Y');
+
     }
 
-    public function buscarFecha()   {
-        $this->fecha = Carbon::parse($this->fecha)->format('d-m-Y');
-    }
+    public function changeFecha($fecha)   {
+        $this->fecha = $fecha;
+     }//$this->fecha = Carbon::parse($this->fecha)->format('d-m-Y');  }
 
     public function changeGrupo(){}
 
-    public function actualizarAsistencia($miembroId)
-    {
-        if (!$miembroId) {
-            return response()->json(['error' => 'Faltan datos']);
+    public function guardarAsistencia(){
+
+        $this->validate([
+            'asistencias' => 'required|array',
+            'fecha' => 'required|date|before:today|after:1945-01-01',
+            'grupoId' => 'required|exists:grupos,id'
+        ]);
+
+        $fecha = $this->fecha;
+        $fecha = Carbon::parse($fecha)->format('Y-m-d');
+
+        foreach ($this->asistencias as $miembroId => $asistencia) {
+
+            ModelsAsistencia::create([
+                'grupo_miembro_id' => $miembroId,
+                'fecha' => $fecha,
+                'asistio' => $asistencia,
+                'mensaje' => false
+            ]);
         }
 
-        $miembro = MiembrosGrupo::findOrFail($miembroId);
 
-        ModelsAsistencia::create([
-            'grupo_miembro_id' => $miembroId,
-            'fecha' => Carbon::parse($this->fecha)->format('Y-m-d'),
-            'asistio' => true,
-            'mensaje' => false
-        ]);
     }
+
+    // public function actualizarAsistencia($miembroId)
+    // {
+    //     if (!$miembroId) {
+    //         return response()->json(['error' => 'Faltan datos']);
+    //     }
+
+    //     $miembro = MiembrosGrupo::findOrFail($miembroId);
+
+    //     ModelsAsistencia::create([
+    //         'grupo_miembro_id' => $miembroId,
+    //         'fecha' => Carbon::parse($this->fecha)->format('Y-m-d'),
+    //         'asistio' => true,
+    //         'mensaje' => false
+    //     ]);
+    // }
 
     public function render()
     {
@@ -48,16 +79,22 @@ class Asistencia extends Component
         $grupoId=$this->grupoId;
         $userId= auth()->user()->id;
 
-        $miembros= MiembrosGrupo::with('asistencias', 'miembro')
+        $miembros= MiembrosGrupo::with(['asistencias' => function ($q) use ($fecha) {
+            // $q->select('fecha', 'asistio')
+            // ->where('fecha', '2025-11-23');
+        },
+        'miembro'])
         ->whereHas('grupo', function ($query) use ($userId, $grupoId) {
             $query->where('user_id', $userId);
-            $query->where('id', $grupoId);
+            $query->where('id', 1);
         })
-        ->whereHas('asistencias', function ($query) use ($fecha) {
-            $query->where('fecha', $fecha);
-        })
+        // ->whereHas('asistencias', function ($query) use ($fecha) {
+        //     $query->where('fecha', $fecha);
+        // })
         ->where('estado', 1)
         ->get();
+
+        // dd($miembros);
 
         $data = $miembros->map(function ($miembro) use ($fecha) {
             return [
@@ -69,12 +106,14 @@ class Asistencia extends Component
             ];
         });
 
+
+
         $grupos = Grupos::select('id', 'nombre')->where('user_id', $userId)
         ->orderBy('id', 'desc')
         ->get();
 
         return view('livewire.asistencia', [
-            'miembros' => $data->toArray(),
+            'miembros' => $data,
             'grupos' => $grupos,
             'fecha' => $fecha
         ]);
