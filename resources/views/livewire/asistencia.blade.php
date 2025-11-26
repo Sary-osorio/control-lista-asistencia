@@ -4,7 +4,7 @@
             {{ $message }}
         </div>
     @enderror
-    {{ $miembros }}
+
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden  sm:rounded-lg flex justify-center items-center flex-col">
             <div class="w-full">
@@ -12,7 +12,7 @@
                     <div class="flex flex-col lg:flex-row items-center w-9/12">
                         <h1 class=" pe-4">Marque la asistencia de este dia:</h1>
 
-                        <input type="text" wire:model.defer="fecha"  class="my-2 lg:my-0 max-w-72 lg:max-w-auto" id="fecha" name="fecha">
+                        <input type="text" wire:model.defer="fecha"class="my-2 lg:my-0 max-w-72 lg:max-w-auto" id="fecha" name="fecha">
 
                         @error('fecha')
                             <span class="text-red-500">{{ $message }}</span>
@@ -61,12 +61,12 @@
                                     <td>
                                         @php
                                             $checkboxId = 'asistio_' . $miembro['id'];
-                                            $nu = 'aqui';
                                         @endphp
                                         <input type="checkbox" class="asistencia-checkbox" style="display: none"
                                             id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
                                             wire:model.defer="asistencias.{{ $miembro['id'] }}"
-                                            @if ($miembro['asistio']) checked @endif>
+                                            wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
+                                        >
 
                                         <label class="switch" for="{{ $checkboxId }}"></label>
 
@@ -109,7 +109,9 @@
                 },
                 onSelect: ({date, formattedDate, datepicker}) => {
                     @this.fecha = formattedDate;
-                    $wire.$refresh()
+                    $wire.call('changeFecha');
+
+                    // $wire.$refresh()
                 }
             });
 
