@@ -4,7 +4,8 @@
             {{ $message }}
         </div>
     @enderror
-
+        {{-- {{ $fecha }}
+        {{ $grupoId }} --}}
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden  sm:rounded-lg flex justify-center items-center flex-col">
             <div class="w-full">
@@ -66,6 +67,7 @@
                                             id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
                                             wire:model.defer="asistencias.{{ $miembro['id'] }}"
                                             wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
+                                            @if ($asistencias[$miembro['id']] == 1) disabled @endif
                                         >
 
                                         <label class="switch" for="{{ $checkboxId }}"></label>
@@ -82,6 +84,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    {{-- @json($asistencias) --}}
                 </div>
             @endif
         </div>

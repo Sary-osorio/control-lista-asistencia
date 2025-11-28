@@ -18,52 +18,24 @@ class Asistencia extends Component
     public function mount()
     {
         $grupos = Grupos::where('user_id', auth()->id())->get();
-
         if ($grupos->count() > 0) {
             $this->grupoId = $grupos->last()->id;
         }
-
         $this->fecha = now()->format('d-m-Y');
 
+        $this->actualizarAsistencia();
     }
 
-    public function changeFecha()   {
-        // $this->fecha = $fecha;
-
-        $fecha = $this->fecha;
-        $fecha = Carbon::parse($fecha)->format('Y-m-d');
-
-        $data = ModelsAsistencia::where('fecha', $fecha)
-        ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
-        ->get();
-
-        $this->asistencias = [];
-
-        foreach ($data as $item) {
-            $this->asistencias[$item->grupo_miembro_id] = (bool) $item->asistio ?? false;
-        }
-
-        // $miembrosIds = MiembrosGrupo::where('grupo_id', $this->grupoId)
-        //     ->pluck('id')
-        //     ->toArray();
-
-        // $data = ModelsAsistencia::where('fecha', $fecha)
-        //     ->whereIn('grupo_miembro_id', $miembrosIds)
-        //     ->get()
-        //     ->keyBy('grupo_miembro_id');
-
-        // $this->asistencias = [];
-
-        // foreach ($miembrosIds as $id) {
-        //     $this->asistencias[$id] =
-        //         isset($data[$id]) ? (bool) $data[$id]->asistio : false;
-        // }
-
-
+    public function changeFecha()
+     {
+        $this->actualizarAsistencia();
      }
 
-    public function changeGrupo(){
-
+    public function changeGrupo()
+    {
+        $this->actualizarAsistencia();
+    }
+    private function actualizarAsistencia(){
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
@@ -71,11 +43,11 @@ class Asistencia extends Component
         ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
         ->get();
 
-        $this->asistencias = [];
+         $this->asistencias = $data
+        ->pluck('asistio', 'grupo_miembro_id')
+        ->map(fn($asistio) => (bool)$asistio)
+        ->toArray();
 
-        foreach ($data as $item) {
-            $this->asistencias[$item->grupo_miembro_id] = (bool) $item->asistio;
-        }
     }
 
     public function guardarAsistencia(){
@@ -102,21 +74,6 @@ class Asistencia extends Component
 
     }
 
-    // public function actualizarAsistencia($miembroId)
-    // {
-    //     if (!$miembroId) {
-    //         return response()->json(['error' => 'Faltan datos']);
-    //     }
-
-    //     $miembro = MiembrosGrupo::findOrFail($miembroId);
-
-    //     ModelsAsistencia::create([
-    //         'grupo_miembro_id' => $miembroId,
-    //         'fecha' => Carbon::parse($this->fecha)->format('Y-m-d'),
-    //         'asistio' => true,
-    //         'mensaje' => false
-    //     ]);
-    // }
 
     public function render()
     {
