@@ -4,8 +4,9 @@
             {{ $message }}
         </div>
     @enderror
-        {{-- {{ $fecha }}
-        {{ $grupoId }} --}}
+        {{ $fecha }}
+        {{ $grupoId }}
+
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden  sm:rounded-lg flex justify-center items-center flex-col">
             <div class="w-full">
@@ -32,11 +33,12 @@
                         @enderror
                         {{-- <button class="mx-4" type="submit" > Buscar Fecha</button> --}}
                     </div>
-
+                    {{-- @if(isset( $guardarAsistencia ) && $guardarAsistencia == 0) --}}
                     <div class="w-3/12 flex justify-end ms-2">
                         <button class="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
-                            id="openModal">Guardar asistencia</button>
+                            >Guardar asistenciaxd</button>
                     </div>
+                    {{-- @endif --}}
                 </form>
             </div>
 
@@ -58,19 +60,22 @@
                         <tbody>
                             @foreach ($miembros as $miembro)
                                 <tr>
-                                    <td>{{ $miembro['nombre'] }} </td>
+                                    <td>{{ $miembro['nombre'] }} {{ $miembro['id'] }} </td>
                                     <td>
-                                        @php
+                                        {{-- @php
                                             $checkboxId = 'asistio_' . $miembro['id'];
                                         @endphp
-                                        <input type="checkbox" class="asistencia-checkbox" style="display: none"
-                                            id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
-                                            wire:model.defer="asistencias.{{ $miembro['id'] }}"
-                                            wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
-                                            @if ($asistencias[$miembro['id']] == 1) disabled @endif
-                                        >
+                                        <input type="checkbox"
+                                               class="asistencia-checkbox" style="display: none"
+                                            id="{{ $checkboxId }}"
+                                            value="1"
+                                            wire:change="changeAsistencia({{ $miembro['id'] }})"
+                                            wire:model="asistencias.{{ $miembro['id'] }}"
+                                            wire:key="asistio-{{ $miembro['id'] }}-{{ $fecha }}"
+                                            {{-- @if (isset($asistencias[$miembro['id']]) && $asistencias[$miembro['id']] == 1) disabled @endif --}}
+                                        {{-- > --}}
 
-                                        <label class="switch" for="{{ $checkboxId }}"></label>
+                                       {{-- <label class="switch" for="{{ $checkboxId }}"></label> --}}
 
                                     </td>
                                     {{-- <td>
@@ -84,7 +89,15 @@
                             @endforeach
                         </tbody>
                     </table>
-                    {{-- @json($asistencias) --}}
+                    @if ($errors->any())
+                        <ul>
+                            @foreach ($errors->all() as $e)
+                                <li>{{ $e }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+
+                    @json($asistencias)
                 </div>
             @endif
         </div>
@@ -121,5 +134,17 @@
 
         })
     </script>
+
+    <script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.onError((error, component) => {
+            console.error('Error Livewire:', error);
+            alert(error.message);
+
+            return false; // evita que Livewire lo maneje silenciosamente
+        });
+    });
+    </script>
+
 @endscript
 
