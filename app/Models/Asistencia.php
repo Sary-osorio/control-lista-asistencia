@@ -11,7 +11,8 @@ class Asistencia extends Model
     protected $fillable = [
         'grupo_miembro_id',
         'asistencias_fecha_id',
-        'asistio'
+        'asistio',
+        'mensaje',
     ];
 
     protected $casts = [
