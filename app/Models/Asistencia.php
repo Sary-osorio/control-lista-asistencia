@@ -11,8 +11,11 @@ class Asistencia extends Model
     protected $fillable = [
         'grupo_miembro_id',
         'asistencias_fecha_id',
-        'asistio',
-        'mensaje',
+        'asistio'
+    ];
+
+    protected $casts = [
+        'asistio' => 'boolean',
     ];
 
     public function miembroGrupo()
