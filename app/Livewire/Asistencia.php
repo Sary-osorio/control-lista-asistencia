@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Asistencia as ModelsAsistencia;
+use App\Models\AsistenciasFecha;
 use App\Models\Grupos;
 use App\Models\MiembrosGrupo;
 use Carbon\Carbon;
@@ -39,7 +40,12 @@ class Asistencia extends Component
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
-        $data = ModelsAsistencia::where('fecha', $fecha)
+        // $data = ModelsAsistencia::where('fecha', $fecha)
+        // ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
+        // ->get();
+
+        $data = ModelsAsistencia::with('fecha')
+        ->whereHas('fecha', fn($q) => $q->where('fecha', $fecha))
         ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
         ->get();
 
@@ -61,11 +67,16 @@ class Asistencia extends Component
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
+        $fechaRegistrada = AsistenciasFecha::create([
+            'fecha' => $fecha,
+            'estado' => 1,
+        ]);
+
         foreach ($this->asistencias as $miembroId => $asistencia) {
 
             ModelsAsistencia::create([
                 'grupo_miembro_id' => $miembroId,
-                'fecha' => $fecha,
+                'asistencias_fecha_id' => $fechaRegistrada->id,
                 'asistio' => $asistencia,
                 'mensaje' => false
             ]);
@@ -98,26 +109,55 @@ class Asistencia extends Component
         // ->where('estado', 1)
         // ->get();
 
-        $miembros = DB::table('grupos_miembros as gm')
+        // $miembros = DB::table('grupos_miembros as gm')
+        //             ->select(
+        //                 'gm.id as id',
+        //                 'g.user_id',
+        //                 DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as miembro"),
+        //                 'a.fecha',
+        //                 'a.asistio'
+        //             )
+        //             ->join('grupos as g', 'g.id', '=', 'gm.grupo_id')
+        //             ->join('miembros as m', 'm.id', '=', 'gm.miembro_id')
+        //             ->leftJoin('asistencias as a', function($join) use ($fecha) {
+        //                 $join->on('a.grupo_miembro_id', '=', 'gm.id')
+        //                     ->where('a.fecha', '=', $fecha);
+        //             })
+        //             ->where('gm.grupo_id', $grupoId)
+        //             ->get()
+        //             ->map(function ($miembro) {
+        //                 return [
+        //                     'id' => $miembro->id,
+        //                     'nombre' => $miembro->miembro,
+        //                     'fecha' => $miembro->fecha,
+        //                     'asistio' => $miembro->asistio,
+        //                 ];
+        //             });
+
+                     $miembros = MiembrosGrupo::query()
                     ->select(
-                        'gm.id as id',
-                        'g.user_id',
-                        DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as miembro"),
-                        'a.fecha',
+                        'grupos_miembros.id as id',
+                        DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
+                        'af.fecha',
                         'a.asistio'
                     )
-                    ->join('grupos as g', 'g.id', '=', 'gm.grupo_id')
-                    ->join('miembros as m', 'm.id', '=', 'gm.miembro_id')
-                    ->leftJoin('asistencias as a', function($join) use ($fecha) {
-                        $join->on('a.grupo_miembro_id', '=', 'gm.id')
-                            ->where('a.fecha', '=', $fecha);
+                    ->join('grupos as g', 'g.id', '=', 'grupos_miembros.grupo_id')
+                    ->join('miembros as m', 'm.id', '=', 'grupos_miembros.miembro_id')
+                    ->leftJoin('asistencias as a', 'a.grupo_miembro_id', '=', 'grupos_miembros.id')
+                    ->leftJoin('asistencias_fecha as af', function ($join) use ($fecha) {
+                        $join->on('af.id', '=', 'a.asistencias_fecha_id')
+                            ->where('af.fecha', $fecha);
                     })
-                    ->where('gm.grupo_id', $grupoId)
+                    // ->leftJoin('asistencias as a', function($join) use ($fecha) {
+                    //     $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
+                    //         ->where('a.fecha', '=', $fecha);
+                    // })
+                    ->where('grupos_miembros.grupo_id', $grupoId)
                     ->get()
                     ->map(function ($miembro) {
                         return [
                             'id' => $miembro->id,
-                            'nombre' => $miembro->miembro,
+                            'nombre' => $miembro->nombre,
                             'fecha' => $miembro->fecha,
                             'asistio' => $miembro->asistio,
                         ];

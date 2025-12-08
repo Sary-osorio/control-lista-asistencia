@@ -10,7 +10,7 @@ class Asistencia extends Model
 
     protected $fillable = [
         'grupo_miembro_id',
-        'fecha',
+        'asistencias_fecha_id',
         'asistio',
         'mensaje',
     ];
@@ -18,6 +18,11 @@ class Asistencia extends Model
     public function miembroGrupo()
     {
         return $this->belongsTo(MiembrosGrupo::class, 'grupo_miembro_id');
+    }
+
+    public function fecha()
+    {
+        return $this->belongsTo(AsistenciasFecha::class, 'asistencias_fecha_id');
     }
 
     // public function getAsistioAttribute($value)
