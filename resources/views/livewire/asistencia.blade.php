@@ -4,8 +4,8 @@
             {{ $message }}
         </div>
     @enderror
-        {{-- {{ $fecha }}
-        {{ $grupoId }} --}}
+        {{ $fecha }} -
+        {{ $grupoId }}
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden  sm:rounded-lg flex justify-center items-center flex-col">
             <div class="w-full">
@@ -55,6 +55,7 @@
                                 {{-- <th>Mensaje</th> --}}
                             </tr>
                         </thead>
+                         @json($miembros)
                         <tbody>
                             @foreach ($miembros as $miembro)
                                 <tr>
@@ -84,7 +85,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                    {{-- @json($asistencias) --}}
+                    @json($asistencias)
                 </div>
             @endif
         </div>

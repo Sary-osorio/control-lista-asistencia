@@ -134,31 +134,33 @@ class Asistencia extends Component
         //                 ];
         //             });
 
+                    $fechaBuscar= AsistenciasFecha::where('fecha', $fecha)->first();
+
                      $miembros = MiembrosGrupo::query()
                     ->select(
                         'grupos_miembros.id as id',
                         DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
-                        'af.fecha',
+
                         'a.asistio'
                     )
                     ->join('grupos as g', 'g.id', '=', 'grupos_miembros.grupo_id')
                     ->join('miembros as m', 'm.id', '=', 'grupos_miembros.miembro_id')
-                    ->leftJoin('asistencias as a', 'a.grupo_miembro_id', '=', 'grupos_miembros.id')
-                    ->leftJoin('asistencias_fecha as af', function ($join) use ($fecha) {
-                        $join->on('af.id', '=', 'a.asistencias_fecha_id')
-                            ->where('af.fecha', $fecha);
-                    })
-                    // ->leftJoin('asistencias as a', function($join) use ($fecha) {
-                    //     $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
-                    //         ->where('a.fecha', '=', $fecha);
+                    // ->leftJoin('asistencias as a', 'a.grupo_miembro_id', '=', 'grupos_miembros.id')
+                    // ->leftJoin('asistencias_fecha as af', function ($join) use ($fecha) {
+                    //     $join->on('af.id', '=', 'a.asistencias_fecha_id')
+                    //         ->where('af.fecha', $fecha);
                     // })
+                    ->leftJoin('asistencias as a', function($join) use ($fechaBuscar) {
+                        $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
+                            ->where('a.asistencias_fecha_id', '=', $fechaBuscar->id);
+                    })
                     ->where('grupos_miembros.grupo_id', $grupoId)
                     ->get()
-                    ->map(function ($miembro) {
+                    ->map(function ($miembro) use ($fechaBuscar) {
                         return [
                             'id' => $miembro->id,
                             'nombre' => $miembro->nombre,
-                            'fecha' => $miembro->fecha,
+                            'fecha' => $fechaBuscar->fecha,
                             'asistio' => $miembro->asistio,
                         ];
                     });
