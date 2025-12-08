@@ -65,15 +65,12 @@
                                         {{-- @php
                                             $checkboxId = 'asistio_' . $miembro['id'];
                                         @endphp
-                                        <input type="checkbox"
-                                               class="asistencia-checkbox" style="display: none"
-                                            id="{{ $checkboxId }}"
-                                            value="1"
-                                            wire:change="changeAsistencia({{ $miembro['id'] }})"
-                                            wire:model="asistencias.{{ $miembro['id'] }}"
-                                            wire:key="asistio-{{ $miembro['id'] }}-{{ $fecha }}"
-                                            {{-- @if (isset($asistencias[$miembro['id']]) && $asistencias[$miembro['id']] == 1) disabled @endif --}}
-                                        {{-- > --}}
+                                        <input type="checkbox" class="asistencia-checkbox" style="display: none"
+                                            id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
+                                            wire:model.defer="asistencias.{{ $miembro['id'] }}"
+                                            wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
+                                            {{-- @if ($asistencias[$miembro['id']] == 1) disabled @endif --}}
+                                        >
 
                                        {{-- <label class="switch" for="{{ $checkboxId }}"></label> --}}
 
