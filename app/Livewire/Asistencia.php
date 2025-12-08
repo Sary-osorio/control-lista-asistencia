@@ -15,8 +15,6 @@ class Asistencia extends Component
     public $fecha;
     public $grupoId;
     public $asistencias=[];
-    public $asistenciasJson = '';
-    public $guardarAsistencia='0';
 
     public function mount()
     {
@@ -26,20 +24,19 @@ class Asistencia extends Component
         }
         $this->fecha = now()->format('d-m-Y');
 
-        $this->buscarAsistencia();
+        $this->actualizarAsistencia();
     }
 
     public function changeFecha()
      {
-        $this->buscarAsistencia();
+        $this->actualizarAsistencia();
      }
 
     public function changeGrupo()
     {
-        $this->buscarAsistencia();
+        $this->actualizarAsistencia();
     }
-
-  private function actualizarAsistencia(){
+    private function actualizarAsistencia(){
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
@@ -59,8 +56,7 @@ class Asistencia extends Component
 
     }
 
-
-   public function guardarAsistencia(){
+    public function guardarAsistencia(){
 
         $this->validate([
             'asistencias' => 'required|array',
@@ -82,7 +78,7 @@ class Asistencia extends Component
                 'grupo_miembro_id' => $miembroId,
                 'asistencias_fecha_id' => $fechaRegistrada->id,
                 'asistio' => $asistencia,
-                'mensaje' => false
+                'mensaje' => 1,
             ]);
         }
 
@@ -92,12 +88,53 @@ class Asistencia extends Component
 
     public function render()
     {
-        $fecha = $this->fecha;
+
+        $fecha = $this->fecha; // Si no hay búsqueda, usa la fecha actual
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
         $grupoId=$this->grupoId;
         $userId= auth()->user()->id;
 
-        $miembros = MiembrosGrupo::query()
+        // $miembros= MiembrosGrupo::with(['asistencias' => function ($q) use ($fecha) {
+        //     // $q->select('fecha', 'asistio')
+        //     // ->where('fecha', '2025-11-23');
+        // },
+        // 'miembro'])
+        // ->whereHas('grupo', function ($query) use ($userId, $grupoId) {
+        //     $query->where('user_id', $userId);
+        //     $query->where('id', 1);
+        // })
+        // // ->whereHas('asistencias', function ($query) use ($fecha) {
+        // //     $query->where('fecha', $fecha);
+        // // })
+        // ->where('estado', 1)
+        // ->get();
+
+        // $miembros = DB::table('grupos_miembros as gm')
+        //             ->select(
+        //                 'gm.id as id',
+        //                 'g.user_id',
+        //                 DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as miembro"),
+        //                 'a.fecha',
+        //                 'a.asistio'
+        //             )
+        //             ->join('grupos as g', 'g.id', '=', 'gm.grupo_id')
+        //             ->join('miembros as m', 'm.id', '=', 'gm.miembro_id')
+        //             ->leftJoin('asistencias as a', function($join) use ($fecha) {
+        //                 $join->on('a.grupo_miembro_id', '=', 'gm.id')
+        //                     ->where('a.fecha', '=', $fecha);
+        //             })
+        //             ->where('gm.grupo_id', $grupoId)
+        //             ->get()
+        //             ->map(function ($miembro) {
+        //                 return [
+        //                     'id' => $miembro->id,
+        //                     'nombre' => $miembro->miembro,
+        //                     'fecha' => $miembro->fecha,
+        //                     'asistio' => $miembro->asistio,
+        //                 ];
+        //             });
+
+                     $miembros = MiembrosGrupo::query()
                     ->select(
                         'grupos_miembros.id as id',
                         DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
@@ -126,12 +163,22 @@ class Asistencia extends Component
                         ];
                     });
 
+
+        // $data = $miembros->map(function ($miembro) use ($fecha) {
+        //     return [
+        //         'id' => $miembro->id,
+        //         'nombre' => $miembro->miembro->getFullNameAttribute(),
+        //         'fecha' => $miembro->asistencias->first()?->fecha,
+        //         'asistio' => $miembro->asistencias->first()?->asistio,
+        //         'mensaje' => $miembro->asistencias->first()?->mensaje,
+        //     ];
+        // });
+
+
+
         $grupos = Grupos::select('id', 'nombre')->where('user_id', $userId)
         ->orderBy('id', 'desc')
         ->get();
-
-        \Log::info('Miembros para render: '.json_encode($miembros));
-
 
         return view('livewire.asistencia', [
             'miembros' => $miembros,
