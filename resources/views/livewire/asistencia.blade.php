@@ -63,7 +63,7 @@
                                         @php
                                             $checkboxId = 'asistio_' . $miembro['id'];
                                         @endphp
-                                        <input type="checkbox" class="asistencia-checkbox" style="display: none"
+                                        <input type="checkbox" class="asistencia-checkbox" style="display: block"
                                             id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
                                             wire:model.defer="asistencias.{{ $miembro['id'] }}"
                                             wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
