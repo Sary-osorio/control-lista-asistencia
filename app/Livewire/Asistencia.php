@@ -14,7 +14,7 @@ class Asistencia extends Component
 {
     public $fecha;
     public $grupoId;
-    public $asistencias=[];
+    public $asistencias = [];
 
     public function mount()
     {
@@ -28,15 +28,16 @@ class Asistencia extends Component
     }
 
     public function changeFecha()
-     {
+    {
         $this->actualizarAsistencia();
-     }
+    }
 
     public function changeGrupo()
     {
         $this->actualizarAsistencia();
     }
-    private function actualizarAsistencia(){
+    private function actualizarAsistencia()
+    {
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
@@ -45,19 +46,18 @@ class Asistencia extends Component
         // ->get();
 
         $data = ModelsAsistencia::with('fecha')
-        ->whereHas('fecha', fn($q) => $q->where('fecha', $fecha))
-        ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
-        ->get();
+            ->whereHas('fecha', fn($q) => $q->where('fecha', $fecha))
+            ->whereHas('miembroGrupo', fn($q) => $q->where('grupo_id', $this->grupoId))
+            ->get();
 
-         $this->asistencias = $data
-        ->pluck('asistio', 'grupo_miembro_id')
-        ->map(fn($asistio) => (bool)$asistio)
-        ->toArray();
-
+        $this->asistencias = $data
+            ->pluck('asistio', 'grupo_miembro_id')
+            ->map(fn($asistio) => (bool)$asistio)
+            ->toArray();
     }
 
-    public function guardarAsistencia(){
-
+    public function guardarAsistencia()
+    {
         $this->validate([
             'asistencias' => 'required|array',
             'fecha' => 'required|date|after:1945-01-01',
@@ -67,21 +67,43 @@ class Asistencia extends Component
         $fecha = $this->fecha;
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
 
-        $fechaRegistrada = AsistenciasFecha::create([
-            'fecha' => $fecha,
-            'estado' => 1,
-        ]);
+        $fechaRegistrada = AsistenciasFecha::where('fecha', $fecha)->first();
 
-        foreach ($this->asistencias as $miembroId => $asistencia) {
-
-            ModelsAsistencia::create([
-                'grupo_miembro_id' => $miembroId,
-                'asistencias_fecha_id' => $fechaRegistrada->id,
-                'asistio' => $asistencia,
-                'mensaje' => 1,
+        if(!$fechaRegistrada){
+            $fechaRegistrada = AsistenciasFecha::create([
+                'fecha' => $fecha,
+                'estado' => AsistenciasFecha::ESTADO_PENDIENTE
             ]);
         }
 
+        try {
+            DB::beginTransaction();
+
+            if ($fechaRegistrada->estado == AsistenciasFecha::ESTADO_COMPLETADO) {
+                throw new \Exception('La asistencia para esta fecha ya ha sido registrada.');
+            }
+
+            foreach ($this->asistencias as $miembroId => $asistencia) {
+
+                ModelsAsistencia::create([
+                    'grupo_miembro_id' => $miembroId,
+                    'asistencias_fecha_id' => $fechaRegistrada->id,
+                    'asistio' => $asistencia,
+                    'mensaje' => 1,
+                ]);
+            }
+
+            $fechaRegistrada->estado = AsistenciasFecha::ESTADO_COMPLETADO;
+            $fechaRegistrada->save();
+
+            DB::commit();
+        } catch (\Throwable $th) {
+            \Log::error('Error al guardar la asistencia: ' . $th->getMessage());
+            DB::rollBack();
+            // $this->dispatch('error', message: 'Ocurrió un error al guardar la asistencia');
+            $this->addError('general', 'Error al guardar');
+
+        }
 
     }
 
@@ -89,103 +111,53 @@ class Asistencia extends Component
     public function render()
     {
 
-        $fecha = $this->fecha; // Si no hay búsqueda, usa la fecha actual
+        $fecha = $this->fecha ?? now()->toDateString();
         $fecha = Carbon::parse($fecha)->format('Y-m-d');
-        $grupoId=$this->grupoId;
-        $userId= auth()->user()->id;
+        $grupoId = $this->grupoId;
+        $userId = auth()->user()->id;
 
-        // $miembros= MiembrosGrupo::with(['asistencias' => function ($q) use ($fecha) {
-        //     // $q->select('fecha', 'asistio')
-        //     // ->where('fecha', '2025-11-23');
-        // },
-        // 'miembro'])
-        // ->whereHas('grupo', function ($query) use ($userId, $grupoId) {
-        //     $query->where('user_id', $userId);
-        //     $query->where('id', 1);
-        // })
-        // // ->whereHas('asistencias', function ($query) use ($fecha) {
-        // //     $query->where('fecha', $fecha);
-        // // })
-        // ->where('estado', 1)
-        // ->get();
+        $fechaBuscar = AsistenciasFecha::where('fecha', $fecha)->first();
 
-        // $miembros = DB::table('grupos_miembros as gm')
-        //             ->select(
-        //                 'gm.id as id',
-        //                 'g.user_id',
-        //                 DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as miembro"),
-        //                 'a.fecha',
-        //                 'a.asistio'
-        //             )
-        //             ->join('grupos as g', 'g.id', '=', 'gm.grupo_id')
-        //             ->join('miembros as m', 'm.id', '=', 'gm.miembro_id')
-        //             ->leftJoin('asistencias as a', function($join) use ($fecha) {
-        //                 $join->on('a.grupo_miembro_id', '=', 'gm.id')
-        //                     ->where('a.fecha', '=', $fecha);
-        //             })
-        //             ->where('gm.grupo_id', $grupoId)
-        //             ->get()
-        //             ->map(function ($miembro) {
-        //                 return [
-        //                     'id' => $miembro->id,
-        //                     'nombre' => $miembro->miembro,
-        //                     'fecha' => $miembro->fecha,
-        //                     'asistio' => $miembro->asistio,
-        //                 ];
-        //             });
+        if (!$fechaBuscar) {
+            $fechaBuscar = AsistenciasFecha::create([
+                'fecha' => $fecha,
+                'estado' => '0',
+            ]);
+        }
 
-                    $fechaBuscar= AsistenciasFecha::where('fecha', $fecha)->first();
-
-                     $miembros = MiembrosGrupo::query()
-                    ->select(
-                        'grupos_miembros.id as id',
-                        DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
-
-                        'a.asistio'
-                    )
-                    ->join('grupos as g', 'g.id', '=', 'grupos_miembros.grupo_id')
-                    ->join('miembros as m', 'm.id', '=', 'grupos_miembros.miembro_id')
-                    // ->leftJoin('asistencias as a', 'a.grupo_miembro_id', '=', 'grupos_miembros.id')
-                    // ->leftJoin('asistencias_fecha as af', function ($join) use ($fecha) {
-                    //     $join->on('af.id', '=', 'a.asistencias_fecha_id')
-                    //         ->where('af.fecha', $fecha);
-                    // })
-                    ->leftJoin('asistencias as a', function($join) use ($fechaBuscar) {
-                        $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
-                            ->where('a.asistencias_fecha_id', '=', $fechaBuscar->id);
-                    })
-                    ->where('grupos_miembros.grupo_id', $grupoId)
-                    ->get()
-                    ->map(function ($miembro) use ($fechaBuscar) {
-                        return [
-                            'id' => $miembro->id,
-                            'nombre' => $miembro->nombre,
-                            'fecha' => $fechaBuscar->fecha,
-                            'asistio' => $miembro->asistio,
-                        ];
-                    });
-
-
-        // $data = $miembros->map(function ($miembro) use ($fecha) {
-        //     return [
-        //         'id' => $miembro->id,
-        //         'nombre' => $miembro->miembro->getFullNameAttribute(),
-        //         'fecha' => $miembro->asistencias->first()?->fecha,
-        //         'asistio' => $miembro->asistencias->first()?->asistio,
-        //         'mensaje' => $miembro->asistencias->first()?->mensaje,
-        //     ];
-        // });
-
-
+        $miembros = MiembrosGrupo::query()
+            ->select(
+                'grupos_miembros.id as id',
+                DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
+                'a.asistio',
+            )
+            ->join('grupos as g', 'g.id', '=', 'grupos_miembros.grupo_id')
+            ->join('miembros as m', 'm.id', '=', 'grupos_miembros.miembro_id')
+            ->leftJoin('asistencias as a', function ($join) use ($fechaBuscar) {
+                $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
+                // ->join('asistencias_fecha as af', 'af.id', '=', 'a.asistencias_fecha_id')
+                    ->where('a.asistencias_fecha_id', '=', $fechaBuscar->id);
+            })
+            ->where('grupos_miembros.grupo_id', $grupoId)
+            ->get()
+            ->map(function ($miembro) use ($fechaBuscar) {
+                return [
+                    'id' => $miembro->id,
+                    'nombre' => $miembro->nombre,
+                    'fecha' => $fechaBuscar->fecha,
+                    'asistio' => $miembro->asistio
+                ];
+            });
 
         $grupos = Grupos::select('id', 'nombre')->where('user_id', $userId)
-        ->orderBy('id', 'desc')
-        ->get();
+            ->orderBy('id', 'desc')
+            ->get();
 
         return view('livewire.asistencia', [
             'miembros' => $miembros,
             'grupos' => $grupos,
-            'fecha' => $fecha
+            'fecha' => $fecha,
+            'estado_fecha' => $fechaBuscar->estado,
         ]);
     }
 }

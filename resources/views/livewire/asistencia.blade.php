@@ -4,6 +4,15 @@
             {{ $message }}
         </div>
     @enderror
+
+    @error('general')
+    <div class="bg-red-500 text-white px-4 py-2 rounded mb-3">
+        {{ $message }}
+    </div>
+@enderror
+
+
+
         {{ $fecha }} -
         {{ $grupoId }}
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -32,11 +41,12 @@
                         @enderror
                         {{-- <button class="mx-4" type="submit" > Buscar Fecha</button> --}}
                     </div>
-
+                    @if(isset($estado_fecha) && $estado_fecha == '0')
                     <div class="w-3/12 flex justify-end ms-2">
                         <button class="bg-lime-500 hover:bg-lime-700 text-white font-bold py-2 px-4 rounded"
                             id="openModal">Guardar asistencia</button>
                     </div>
+                    @endif
                 </form>
             </div>
 
@@ -68,7 +78,10 @@
                                             id="{{ $checkboxId }}" {{-- wire:change="actualizarAsistencia({{ $miembro['id'] }})" --}}
                                             wire:model.defer="asistencias.{{ $miembro['id'] }}"
                                             wire:key="asistio-{{ $miembro['id'] }}-{{ $asistencias[$miembro['id']] ?? '0' }}"
-                                            {{-- @if ($asistencias[$miembro['id']] == 1) disabled @endif --}}
+                                            @if ((isset($asistencias[$miembro['id']]) && $asistencias[$miembro['id']] == true)
+                                            || (isset($estado_fecha) && $estado_fecha != '0'))
+                                            disabled
+                                            @endif
                                         >
 
                                         <label class="switch" for="{{ $checkboxId }}"></label>
@@ -91,6 +104,9 @@
         </div>
     </div>
 </div>
+
+
+
 @script
     <script>
         $(document).ready(function() {
@@ -120,7 +136,9 @@
             });
 
 
-        })
+        });
+
+
     </script>
 @endscript
 
