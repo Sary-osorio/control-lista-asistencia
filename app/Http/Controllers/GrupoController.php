@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class GrupoController extends Controller
 {
+
+    public function index(Request $request)
+    {
+        $user=auth()->user()->id;
+        $grupos = Grupos::where('user_id', $user)->get();
+
+        return view('grupo', compact('grupos'));
+    }
     public function store(Request $request)
     {
         $user=auth()->user()->id;

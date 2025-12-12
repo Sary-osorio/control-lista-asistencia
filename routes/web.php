@@ -27,6 +27,12 @@ Route::prefix('miembro')->middleware('auth')->group(function () {
     Route::patch('/update', [MiembroController::class, 'update'])->name('miembro.update');
 });
 
+Route::prefix('grupo')->middleware('auth')->group(function () {
+    Route::match(['GET', 'POST'], '/', [GrupoController::class, 'index'])->name('grupo.index');
+    Route::post('/create', [GrupoController::class, 'create'])->name('grupo.create');
+    Route::patch('/update', [GrupoController::class, 'update'])->name('grupo.update');
+});
+
 Route::prefix('asistencia')->middleware('auth')->group(function () {
     Route::get('/', [AsistenciaController::class, 'index'])->name('asistencia.index');
     Route::get('/listado/{param?}', [AsistenciaController::class, 'listadoAsistencia'])->name('asistencia.listado');
