@@ -36,6 +36,11 @@ class Asistencia extends Component
     {
         $this->actualizarAsistencia();
     }
+
+    public function changeAsistencias()
+    {
+        // $this->actualizarAsistencia();
+    }
     private function actualizarAsistencia()
     {
         $fecha = $this->fecha;
@@ -55,6 +60,8 @@ class Asistencia extends Component
             ->map(fn($asistio) => (bool)$asistio)
             ->toArray();
     }
+
+
 
     public function guardarAsistencia()
     {
