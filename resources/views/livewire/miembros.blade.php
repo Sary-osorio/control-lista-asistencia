@@ -8,7 +8,7 @@
         @if ($data->isEmpty())
         <p class="text-3xl text-center text-gray-400 font-bold">No hay miembros disponibles</p>
         @else
-        <table class="w-full m-0">
+        <table class="w-full m-0 rounded-xl overflow-hidden">
             <thead>
                 <tr>
                     <th>Nombre</th>

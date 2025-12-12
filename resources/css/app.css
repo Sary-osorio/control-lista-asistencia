@@ -27,11 +27,11 @@ table{
 }
 
 table thead {
-    @apply bg-gray-200 text-gray-600;
+    @apply bg-gray-100 text-gray-600;
 }
 
 table thead th{
-    @apply py-3 px-4 text-left;
+    @apply py-3 px-4 text-left px-3 py-2;
 }
 
 table tbody{
@@ -43,7 +43,7 @@ table tbody tr{
 }
 
 table tbody tr td{
-    @apply  py-2 px-4 text-gray-700;
+    @apply  py-2 px-4 text-gray-700 px-3 py-2;
 }
 
 /*Modal*/
