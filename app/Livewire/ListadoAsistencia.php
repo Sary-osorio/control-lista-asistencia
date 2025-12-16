@@ -34,42 +34,44 @@ class ListadoAsistencia extends Component
         //
     }
 
+    public function buscarAsistencia()
+    {
+        $this->render();
+    }
+
     public function render()
     {
         $userId = auth()->user()->id;
         $grupoId = $this->grupoId;
-        $fecha = $this->fecha ?? now()->toDateString();
-        $fecha = Carbon::parse($fecha)->format('Y-m-d');
-        $fechaBuscar = AsistenciasFecha::where('fecha', $fecha)->first();
+        $fecha = Carbon::parse($this->fechaListado)->format('Y-m-d');
+
+         $fechaBuscar = AsistenciasFecha::firstOrCreate(
+                        ['fecha' => $fecha],
+                        ['estado' => AsistenciasFecha::ESTADO_PENDIENTE]
+                        );
 
         $asistencias = MiembrosGrupo::query()
             ->select(
                 'grupos_miembros.id as id',
                 DB::raw("CONCAT(m.nombre, ' ', m.apellidos) as nombre"),
                 'a.asistio',
-                'g.nombre as grupo',
-                'af.fecha as fecha'
+                'g.nombre as grupo'
             )
             ->join('grupos as g', 'g.id', '=', 'grupos_miembros.grupo_id')
             ->join('miembros as m', 'm.id', '=', 'grupos_miembros.miembro_id')
-
             ->leftJoin('asistencias as a', function ($join) use ($fechaBuscar) {
                 $join->on('a.grupo_miembro_id', '=', 'grupos_miembros.id')
-                ->join('asistencias_fecha as af', 'af.id', '=', 'a.asistencias_fecha_id')
-                    ->where('af.estado', '1')
                     ->where('a.asistencias_fecha_id', '=', $fechaBuscar->id);
             })
             ->where('grupos_miembros.grupo_id', $grupoId)
-            ->get()
-            ->map(function ($miembro) use ($fechaBuscar) {
-                return [
-                    'id' => $miembro->id,
-                    'nombre' => $miembro->nombre,
-                    'fecha' => $fechaBuscar->fecha. ' '. $fechaBuscar->estado,
-                    'asistio' => $miembro->asistio,
-                    'grupo' => $miembro->grupo
-                ];
-            });
+            ->paginate(5)
+            ->through(fn ($miembro) => [
+            'id'      => $miembro->id,
+            'nombre'  => $miembro->nombre,
+            'fecha'   => $fechaBuscar->fecha,
+            'asistio' => $miembro->asistio,
+            'grupo'   => $miembro->grupo,
+        ]);
 
         $grupos = Grupos::select('id', 'nombre')->where('user_id', $userId)
             ->orderBy('id', 'desc')
