@@ -1,7 +1,6 @@
 <div>
     <div class="flex flex-col justify-center ">
-        {{$fechaListado}}
-         {{$grupoId}}
+
         {{-- <div class="bg-yellow-300 m-0 p-0"> --}}
             <h1 class="text-center mb-4">Listado de Asistencia</h1>
             <form wire:submit.prevent="buscarAsistencia" class="flex items-center justify-center">
@@ -57,7 +56,7 @@
             <p>Total</p>
         </div>
     </div>
-    @json($asistencias)
+    {{-- @json($asistencias) --}}
         <div class="mt-6">
                     <table class="w-full p-0 m-0   ">
                         <thead class="">

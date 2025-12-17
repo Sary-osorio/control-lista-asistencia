@@ -22,10 +22,16 @@
                         <td>{{ $grupo->descripcion }}</td>
                         <td>
                             {{-- //TODO: AGREGAR BOTONES DE ACCIONES A GRUPOS --}}
-                            {{-- <x-primary-button>Ver detalles</x-primary-button>
-                            <x-primary-button>Editar</x-primary-button>
-                            <x-primary-button>Eliminar</x-primary-button> --}}
-                    </tr>
+                             <span
+                                class="inline-flex items-center gap-1
+                                    px-3 py-1 rounded-full text-xs font-semibold
+                                    bg-gray-100 text-gray-500
+                                    border border-gray-300"
+                                title="Estas Acciones estarán disponibles próximamente">
+
+                                🚧 Acciones no disponibles
+                            </span>
+                        </td>
                 @endforeach
             </tbody>
         </table>

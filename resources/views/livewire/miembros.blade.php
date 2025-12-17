@@ -24,7 +24,16 @@
                         <td>{{ $miembro['fechaNac'] }}</td>
                         <td>{{ $miembro['grupo'] }}</td>
                         <td>
-                            <button>
+                            <span
+                                class="inline-flex items-center gap-1
+                                    px-3 py-1 rounded-full text-xs font-semibold
+                                    bg-gray-100 text-gray-500
+                                    border border-gray-300"
+                                title="Estas Acciones estarán disponibles próximamente">
+
+                                🚧 Acciones no disponibles
+                            </span>
+                            {{-- <button>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="#3b82f6" />
@@ -32,9 +41,10 @@
                                         d="M20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
                                         fill="#3b82f6" />
                                 </svg>
-                            </button>
-                            @if ($miembro['estado'])
-                                {{-- //TODO: AGREGAR FUNCIONES DE EDITAR Y DESACTIVAR --}}
+                            </button> --}}
+                            {{-- //TODO: AGREGAR FUNCIONES DE EDITAR Y DESACTIVAR --}}
+
+                            {{-- @if ($miembro['estado'])
                                 <button>
                                     <svg width="24" height="24" viewBox="0 0 100 100"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +62,7 @@
                                             stroke-linecap="round" />
                                     </svg>
                                 </button>
-                            @endif
+                            @endif --}}
                         </td>
                     </tr>
                 @endforeach
